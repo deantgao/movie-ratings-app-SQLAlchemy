@@ -36,6 +36,35 @@ def load_users():
 
 def load_movies():
     """Load movies from u.item into database."""
+    print "Movies"
+
+    Movie.query.delete()
+
+    for row in open("seed_data/u.item"):
+        row = row.rstrip()
+        row = row.strip("0|1")
+        movie_id, draft_title, released_str, imdb_url = row.split("|")
+
+        if released_str:
+            released_at = datetime.datetime.strptime(released_str, "%d-%b-%Y")
+        else:
+            released_at = None
+
+        if draft_title:
+            title_date = draft_title.split(" (")
+            title = title_date[0]
+
+        movie = Movie(movie_id=movie_id, 
+                      title=title, 
+                      released_at=released_at, 
+                      imdb_url=imdb_url)
+
+        db.session.add(movie)
+
+    db.session.commit()
+
+
+
 
 
 def load_ratings():
@@ -61,7 +90,7 @@ if __name__ == "__main__":
     # In case tables haven't been created, create them
     db.create_all()
 
-    # Import different types of data
+    Import different types of data
     load_users()
     load_movies()
     load_ratings()
