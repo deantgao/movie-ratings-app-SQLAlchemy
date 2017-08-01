@@ -2,8 +2,9 @@
 
 from sqlalchemy import func
 from model import User
-# from model import Rating
-# from model import Movie
+from model import Rating
+from model import Movie
+import datetime
 
 from model import connect_to_db, db
 from server import app
@@ -36,14 +37,14 @@ def load_users():
 
 def load_movies():
     """Load movies from u.item into database."""
+    
     print "Movies"
 
     Movie.query.delete()
 
     for row in open("seed_data/u.item"):
         row = row.rstrip()
-        row = row.strip("0|1")
-        movie_id, draft_title, released_str, imdb_url = row.split("|")
+        movie_id, draft_title, released_str, empty, imdb_url = row.split("|")[:5]
 
         if released_str:
             released_at = datetime.datetime.strptime(released_str, "%d-%b-%Y")
@@ -65,10 +66,28 @@ def load_movies():
 
 
 
-
-
 def load_ratings():
     """Load ratings from u.data into database."""
+
+    print "Ratings"
+
+    Rating.query.delete()
+
+    for row in open("seed_data/u.data"):
+        row = row.rstrip()
+        user_id, movie_id, score, timestamp = row.split("\t")
+
+        rating = Rating(movie_id=movie_id, 
+                        user_id=user_id, 
+                        score=score)
+
+        db.session.add(rating)
+    
+    db.session.commit()
+
+
+
+
 
 
 def set_val_user_id():
@@ -90,7 +109,7 @@ if __name__ == "__main__":
     # In case tables haven't been created, create them
     db.create_all()
 
-    Import different types of data
+    # Import different types of data
     load_users()
     load_movies()
     load_ratings()
