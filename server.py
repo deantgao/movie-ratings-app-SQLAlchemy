@@ -44,24 +44,41 @@ def add_new_user():
 
     user = request.form.get("email")
     password = request.form.get("password")
-    print user
-    print password
     new_user = User(email=user, password=password)
 
-
-    # email_list = db.session.query(User.email).all()
-    # total_emails = []
-    # for email in email_list:
-    #     user_email = email[0]
-    #     total_emails.append(user_email)
-
-    # if user not in total_emails:
     if not User.query.filter_by(email=user).first():
         db.session.add(new_user)
         db.session.commit()
-        return "It Worked"
+        return redirect("/users")
     else:
         return "user is already in the system"
+
+
+@app.route("/login_form")
+def login_form():
+    """Show login form to user."""
+
+    return render_template("login_form.html")
+
+@app.route("/login_user", methods=["POST"])
+def login_user():
+    """Verify user login."""
+
+    user_email = request.form.get("email")
+    user_password = request.form.get("password")
+    # user = User(email=user_email, password=user_password)
+
+    if User.query.filter_by(email=user_email).first():
+        true_user = User.query.filter_by(email=user_email).first()
+        if true_user.password == user_password:
+            return redirect("/")
+        else:
+            return "I'm sorry. That is an incorrect password."
+    else:
+        return "I'm sorry. This email does not have an existing account."
+
+
+
 
 
 if __name__ == "__main__":
