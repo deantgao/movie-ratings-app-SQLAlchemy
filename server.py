@@ -2,10 +2,10 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, redirect, request, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import connect_to_db, db
+from model import User, Rating, Movie, connect_to_db, db
 
 
 app = Flask(__name__)
@@ -22,8 +22,46 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
-    a = jsonify([1,3])
-    return a
+    
+    return render_template("homepage.html")
+
+@app.route("/users")
+def user_list():
+    """Show list of users."""
+
+    users = User.query.all()
+    return render_template("user_list.html", users=users)
+
+@app.route("/registration")
+def registration_form():
+    """Show registration form to user."""
+
+    return render_template("registration_form.html")
+
+@app.route("/process_form", methods=["POST"])
+def add_new_user():
+    """Verifies new users and adds them to database."""
+
+    user = request.form.get("email")
+    password = request.form.get("password")
+    print user
+    print password
+    new_user = User(email=user, password=password)
+
+
+    # email_list = db.session.query(User.email).all()
+    # total_emails = []
+    # for email in email_list:
+    #     user_email = email[0]
+    #     total_emails.append(user_email)
+
+    # if user not in total_emails:
+    if not User.query.filter_by(email=user).first():
+        db.session.add(new_user)
+        db.session.commit()
+        return "It Worked"
+    else:
+        return "user is already in the system"
 
 
 if __name__ == "__main__":
