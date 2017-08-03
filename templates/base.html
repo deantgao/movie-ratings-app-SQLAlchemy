@@ -7,6 +7,20 @@
 <body>
     Ratings
     <hr>
+        <ul>
+          {% for message in get_flashed_messages() %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+
+        <div>
+            {% if {{ session['email'] }} %}
+            <form action="/logout">
+                Would you like to logout?
+                <input type="submit" value="Logout">
+            </form>
+        {% endif %}
+        </div>
 
     {% block content %} put your content here {% endblock %}
 

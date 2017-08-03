@@ -2,7 +2,7 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask, jsonify, render_template, redirect, request, flash, session
+from flask import Flask, jsonify, render_template, redirect, request, flash, session, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import User, Rating, Movie, connect_to_db, db
@@ -51,7 +51,8 @@ def add_new_user():
         db.session.commit()
         return redirect("/users")
     else:
-        return "user is already in the system"
+        flash("This email is already associated with an account. Please log in")
+        return redirect("/login_form")
 
 
 @app.route("/login_form")
@@ -71,20 +72,27 @@ def login_user():
     if User.query.filter_by(email=user_email).first():
         true_user = User.query.filter_by(email=user_email).first()
         if true_user.password == user_password:
-            return redirect("/")
+            session['email'] = user_email
+            flash("Logged in as {}".format(user_email))
+            return redirect('/')
         else:
-            return "I'm sorry. That is an incorrect password."
+            flash("I'm sorry. That is an incorrect password.")
+            return redirect("/login_form")
     else:
-        return "I'm sorry. This email does not have an existing account."
+        flash("I'm sorry. This email does not have an existing account.")
+        return redirect("/registration")
 
-
-
-
+@app.route("/logout")
+def logout():
+    """Log user out."""
+    session['email'] = None
+    flash("You are now logged out.")
+    return redirect("/")
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = True
+    # app.debug = True
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
@@ -94,4 +102,4 @@ if __name__ == "__main__":
 
 
     
-    app.run(port=5000, host='0.0.0.0')
+    app.run(port=8000, host='0.0.0.0')
