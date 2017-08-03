@@ -14,12 +14,12 @@
         </ul>
 
         <div>
-            {% if {{ session['email'] }} %}
+            {% if 'email' in session %}
             <form action="/logout">
                 Would you like to logout?
                 <input type="submit" value="Logout">
             </form>
-        {% endif %}
+            {% endif %}
         </div>
 
     {% block content %} put your content here {% endblock %}

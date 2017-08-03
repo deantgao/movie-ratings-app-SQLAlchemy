@@ -32,6 +32,14 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
+@app.route("/users/<user_id>")
+def show_user_info(user_id):
+    """Show info for individual user."""
+
+    user_info = User.query.filter_by(user_id=user_id).one()
+    return render_template("user_info.html", user_info=user_info)
+
+
 @app.route("/registration")
 def registration_form():
     """Show registration form to user."""
@@ -85,14 +93,14 @@ def login_user():
 @app.route("/logout")
 def logout():
     """Log user out."""
-    session['email'] = None
+    del session['email']
     flash("You are now logged out.")
     return redirect("/")
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    # app.debug = True
+    app.debug = True
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
